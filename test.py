@@ -1,16 +1,3 @@
-# tb-loki-central-logger
-
-Dead-simple centralized logging to **Grafana Loki**. Zero dependencies — stdlib only.
-
-```bash
-pip install tb-loki-central-logger
-```
-
----
-
-## `LokiHandler` drop-in for standard `logging`
-
-```python
 import logging
 from pathlib import Path
 
@@ -42,4 +29,3 @@ logging.warning("Cache miss444")
 logging.error("Something broke444")
 
 handler.close()
-```
