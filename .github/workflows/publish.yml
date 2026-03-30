@@ -1,0 +1,68 @@
+# Publishes to TestPyPI on pushes to feature/* branches, and to PyPI on pushes to main.
+#
+# Add these repository secrets (Settings → Secrets and variables → Actions):
+#   TEST_PYPI_API_TOKEN — API token from https://test.pypi.org/manage/account/token/
+#   PYPI_API_TOKEN      — API token from https://pypi.org/manage/account/token/
+# Username for both is always __token__ when using API tokens.
+
+name: Publish package
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+
+jobs:
+  publish-to-testpypi:
+    name: Publish to TestPyPI
+    if: startsWith(github.ref_name, 'feature/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build
+        run: pip install build
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build
+        run: pip install build
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
